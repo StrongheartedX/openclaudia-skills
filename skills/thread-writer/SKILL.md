@@ -1,10 +1,13 @@
 ---
 name: thread-writer
 description: >
-  Write viral Twitter/X threads with proven structures, hooks, and engagement tactics. Includes
-  templates for story threads, listicle threads, contrarian takes, tutorials, and case studies.
-  Trigger phrases: "write a thread", "Twitter thread", "X thread", "viral thread", "thread writer",
-  "tweetstorm", "thread template", "thread about", "turn this into a thread".
+  Write viral Twitter/X threads and Reddit posts with proven structures, hooks, and engagement
+  tactics. Includes templates for story threads, listicle threads, contrarian takes, tutorials,
+  and case studies. Can post directly to Reddit. Trigger phrases: "write a thread",
+  "Twitter thread", "X thread", "viral thread", "thread writer", "tweetstorm", "thread template",
+  "thread about", "turn this into a thread", "reddit post", "write a reddit post".
+allowed-tools:
+  - Bash
 ---
 
 # Thread Writer Skill
@@ -291,3 +294,62 @@ Before posting, ensure the thread passes these checks:
 - [ ] The thread teaches, inspires, or entertains (ideally two of three).
 - [ ] No links in the hook tweet (add links in the last tweet or first reply).
 - [ ] Thread can be understood without the previous tweet's context.
+
+---
+
+## Reddit Long-Form Posts
+
+Threads can be adapted as Reddit self-posts. Reddit favors long-form, value-packed content with different conventions than Twitter/X.
+
+### Reddit Post Format
+
+```markdown
+**Title:** [Compelling, specific title — Reddit titles are crucial for clicks]
+
+**Body:**
+[Hook paragraph — state the value proposition immediately]
+
+[Main content — use markdown formatting: **bold**, bullet lists, numbered steps]
+
+[Conclusion with a question to encourage comments]
+
+---
+
+*[Optional: subtle CTA or link to resource]*
+```
+
+### Reddit vs Twitter/X Differences
+
+| Aspect | Twitter/X | Reddit |
+|--------|-----------|--------|
+| Title | No title — hook is first tweet | Title is everything — make it click-worthy |
+| Length | 280 chars per tweet | 40,000 char limit — go deep |
+| Tone | Punchy, confident, personal | Helpful, humble, community-first |
+| Self-promo | Acceptable with value | Must be subtle or banned |
+| Formatting | Line breaks only | Full markdown (bold, lists, headers, links) |
+| Engagement | Retweets, likes | Upvotes, comments (comments matter more) |
+| Hashtags | 1-3 relevant | Never use hashtags on Reddit |
+
+### Converting a Twitter Thread to Reddit Post
+
+1. **Title:** Turn the hook tweet into a compelling title
+2. **Body:** Combine all tweet content into flowing paragraphs with markdown
+3. **Expand:** Reddit readers expect more depth — add examples, data, context
+4. **End with a question:** "What has worked for you?" drives comments
+5. **Remove self-promo:** No "follow me" CTAs — add value only
+
+### Posting to Reddit
+
+If `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` are available, you can post directly. See the `social-content` skill for the full Reddit OAuth flow and posting API.
+
+Quick reference:
+
+```bash
+# Post to a subreddit (requires user-authenticated OAuth token)
+curl -s -X POST "https://oauth.reddit.com/api/submit" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}" \
+  -d "sr={subreddit}&kind=self&title={title}&text={body}&api_type=json"
+```
+
+**Always preview the post and ask for user confirmation before submitting.**

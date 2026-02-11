@@ -40,14 +40,14 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 ### Email Marketing
 | Skill | Description |
 |-------|-------------|
-| `email-sequence` | Create drip campaigns and nurture sequences |
-| `email-subject-lines` | Generate and A/B test email subject lines |
+| `email-sequence` | Create and send drip campaigns via Resend API |
+| `email-subject-lines` | Generate, A/B test, and send email subject lines |
 
 ### Social Media
 | Skill | Description |
 |-------|-------------|
-| `social-content` | Create posts for Twitter/X, LinkedIn, Instagram |
-| `thread-writer` | Write viral Twitter/X threads |
+| `social-content` | Create and publish posts to Reddit, X, LinkedIn, Instagram, Facebook |
+| `thread-writer` | Write and post viral threads on X and Reddit |
 | `content-calendar` | Plan and schedule social media content |
 
 ### Ads & Conversion

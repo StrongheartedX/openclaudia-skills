@@ -1,11 +1,17 @@
 ---
 name: social-content
 description: >
-  Create social media posts for Twitter/X, LinkedIn, Instagram, and TikTok. Platform-specific
-  formats, character limits, hashtag strategies, hooks, and content repurposing. Trigger phrases:
+  Create and publish social media posts for Reddit, Twitter/X, LinkedIn, Instagram, Facebook,
+  and TikTok. Platform-specific formats, character limits, hashtag strategies, hooks, and
+  content repurposing. Can post directly to Reddit and other platforms via API. Trigger phrases:
   "social media post", "tweet", "LinkedIn post", "Instagram caption", "TikTok script",
   "social content", "social media copy", "carousel", "thread", "social media strategy",
-  "repurpose content", "hashtag strategy".
+  "repurpose content", "hashtag strategy", "post to reddit", "publish on social",
+  "post on reddit", "share on social media".
+allowed-tools:
+  - Bash
+  - WebFetch
+  - WebSearch
 ---
 
 # Social Content Skill
@@ -404,3 +410,103 @@ curl -s "https://oauth.reddit.com/search?q={topic}&sort=relevance&t=week&limit=2
 - Design: r/design, r/graphic_design, r/UI_Design
 
 **Note:** Reddit API rate limits are 100 requests per minute. The access token expires after 24 hours. Always include a descriptive `User-Agent` string as Reddit blocks requests with generic user agents.
+
+---
+
+## Publishing Content via API
+
+These integrations let you post directly to social platforms from the terminal. **Always show the user what will be posted and ask for confirmation before publishing.**
+
+### Posting to Reddit
+
+Requires `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, and a Reddit user account OAuth token.
+
+**Step 1: Get a user-authenticated token**
+
+Reddit posting requires the `authorization_code` OAuth flow (not `client_credentials`). The user must authorize once:
+
+```bash
+# Generate the authorization URL (user visits in browser)
+echo "https://www.reddit.com/api/v1/authorize?client_id=${REDDIT_CLIENT_ID}&response_type=code&state=openclaudia&redirect_uri=http://localhost:8080&duration=permanent&scope=submit,read,identity"
+```
+
+After the user authorizes and gets the `code` from the redirect:
+
+```bash
+# Exchange code for access + refresh token
+curl -s -X POST "https://www.reddit.com/api/v1/access_token" \
+  -u "${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}" \
+  -d "grant_type=authorization_code&code={CODE}&redirect_uri=http://localhost:8080" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}"
+```
+
+Save the `refresh_token` for future sessions:
+
+```bash
+# Refresh an expired token
+curl -s -X POST "https://www.reddit.com/api/v1/access_token" \
+  -u "${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}" \
+  -d "grant_type=refresh_token&refresh_token={REFRESH_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}"
+```
+
+**Step 2: Post to a subreddit**
+
+```bash
+# Text post (self post)
+curl -s -X POST "https://oauth.reddit.com/api/submit" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}" \
+  -d "sr={subreddit}&kind=self&title={post_title}&text={post_body}&api_type=json"
+
+# Link post
+curl -s -X POST "https://oauth.reddit.com/api/submit" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}" \
+  -d "sr={subreddit}&kind=link&title={post_title}&url={url}&api_type=json"
+```
+
+**Step 3: Post a comment (for engagement)**
+
+```bash
+curl -s -X POST "https://oauth.reddit.com/api/comment" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}" \
+  -d "thing_id={parent_fullname}&text={comment_body}&api_type=json"
+```
+
+The `thing_id` is the fullname of the post or comment to reply to (e.g., `t3_abc123` for a post, `t1_abc123` for a comment).
+
+**Reddit posting best practices:**
+- Check subreddit rules before posting (`/r/{subreddit}/about/rules`)
+- Many subreddits have minimum karma/age requirements
+- Avoid self-promotion in subreddits that prohibit it — focus on value
+- Post during peak hours (9-11 AM EST for US subreddits)
+- Use the subreddit's preferred flair if required
+- Space out posts — no more than a few per day across all subreddits
+
+### Multi-Platform Posting via EngageMate
+
+If `ENGAGEMATE_API_KEY` is set, you can use EngageMate to post across Reddit, X/Twitter, Instagram, Facebook, and TikTok from a single API.
+
+```bash
+echo "ENGAGEMATE_API_KEY is ${ENGAGEMATE_API_KEY:+set}"
+```
+
+EngageMate is an AI-powered social engagement platform. Refer to their documentation at https://engagemate.app for current API endpoints. The product ID is stored as `ENGAGEMATE_PRODUCT_ID`.
+
+### Publishing Workflow
+
+When the user asks to post or publish content:
+
+1. **Generate** the content using the platform-specific rules above
+2. **Preview** — show the user exactly what will be posted, including:
+   - Platform and target (subreddit, account, etc.)
+   - Title (if applicable)
+   - Full post body
+   - Hashtags, links, media
+3. **Confirm** — ask the user to approve before posting
+4. **Post** — execute the API call
+5. **Report** — show the post URL and any response data
+
+**Never auto-post without explicit user confirmation.**
