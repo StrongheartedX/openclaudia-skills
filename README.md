@@ -77,6 +77,14 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `launch-strategy` | Product launch planning and execution |
 | `icp-builder` | Define ideal customer profiles |
 
+### Messaging & Notifications
+| Skill | Description | API Required |
+|-------|-------------|--------------|
+| `discord-bot` | Send messages, embeds, and marketing content to Discord | `DISCORD_WEBHOOK_URL` or `DISCORD_BOT_TOKEN` |
+| `slack-bot` | Post rich Block Kit messages and updates to Slack | `SLACK_WEBHOOK_URL` or `SLACK_BOT_TOKEN` |
+| `telegram-bot` | Send formatted posts, polls, and media to Telegram | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` |
+| `feishu-lark` | Post interactive cards and updates to Feishu/Lark | `FEISHU_WEBHOOK_URL` or `FEISHU_APP_ID` |
+
 ### Growth & Automation
 | Skill | Description |
 |-------|-------------|
@@ -122,6 +130,24 @@ REDDIT_CLIENT_SECRET=your_client_secret
 
 # ScrapingBee (competitor-analysis — scraping protected pages)
 SCRAPINGBEE_API_KEY=your_key_here
+
+# Discord (discord-bot)
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+DISCORD_BOT_TOKEN=your_bot_token
+
+# Slack (slack-bot)
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+
+# Telegram (telegram-bot)
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+
+# Feishu / Lark (feishu-lark)
+FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/...
+FEISHU_WEBHOOK_SECRET=your_secret
+FEISHU_APP_ID=your_app_id
+FEISHU_APP_SECRET=your_app_secret
 ```
 
 All API keys are optional. Skills work without them but provide richer data when keys are available. Each skill tells you which key is needed when invoked.
