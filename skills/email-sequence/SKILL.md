@@ -5,7 +5,9 @@ description: >
   for welcome series, abandoned cart, re-engagement, product launch, and onboarding sequences.
   Trigger phrases: "email sequence", "drip campaign", "nurture sequence", "email flow",
   "welcome series", "abandoned cart emails", "onboarding emails", "email automation",
-  "product launch emails", "re-engagement campaign".
+  "product launch emails", "re-engagement campaign", "send email", "send sequence".
+allowed-tools:
+  - Bash
 ---
 
 # Email Sequence Skill
@@ -180,6 +182,84 @@ When the user requests HTML email templates:
 6. **Test in multiple clients** - Gmail, Outlook, Apple Mail, Yahoo at minimum.
 7. **Mobile-first** - 60%+ of emails are opened on mobile. Stack columns on small screens.
 8. **Include a plain-text version** - Always provide a text fallback for deliverability.
+
+## Sending Emails via Resend API
+
+This skill can send emails directly using the [Resend](https://resend.com) API. This is optional:
+if the API key is not configured, the skill will still generate email content as usual without sending.
+
+### Prerequisites
+
+The `RESEND_API_KEY` environment variable must be set. Check for it by running:
+
+```bash
+source ~/.claude/.env.global 2>/dev/null
+if [ -z "$RESEND_API_KEY" ]; then
+  echo "RESEND_API_KEY is not set. Emails will be generated but not sent."
+  echo "To enable sending, add RESEND_API_KEY to ~/.claude/.env.global"
+else
+  echo "RESEND_API_KEY is configured. Ready to send emails."
+fi
+```
+
+### Sending a Single Email
+
+Use the Resend `/emails` endpoint to send an individual email from the sequence:
+
+```bash
+source ~/.claude/.env.global 2>/dev/null
+curl -X POST https://api.resend.com/emails \
+  -H "Authorization: Bearer ${RESEND_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "Your Name <you@yourdomain.com>",
+    "to": ["recipient@example.com"],
+    "subject": "Subject line here",
+    "html": "<p>Email body here</p>"
+  }'
+```
+
+The response returns a JSON object with an `id` field for tracking. Replace the `from`, `to`,
+`subject`, and `html` fields with the actual values from the generated sequence.
+
+### Sending a Batch (Full Sequence)
+
+To send multiple emails from a sequence at once, use the batch endpoint. This is useful for
+sending the same email to multiple recipients or sending several sequence emails simultaneously:
+
+```bash
+source ~/.claude/.env.global 2>/dev/null
+curl -X POST https://api.resend.com/emails/batch \
+  -H "Authorization: Bearer ${RESEND_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "emails": [
+      {
+        "from": "Your Name <you@yourdomain.com>",
+        "to": ["recipient1@example.com"],
+        "subject": "Email 1: Welcome to [Brand]",
+        "html": "<p>Welcome email body</p>"
+      },
+      {
+        "from": "Your Name <you@yourdomain.com>",
+        "to": ["recipient2@example.com"],
+        "subject": "Email 1: Welcome to [Brand]",
+        "html": "<p>Welcome email body</p>"
+      }
+    ]
+  }'
+```
+
+### Important Notes
+
+- **Domain verification required:** The `from` address domain must be verified in your Resend
+  account. If you have not verified a domain, Resend provides a shared `onboarding@resend.dev`
+  address for testing.
+- **Rate limits:** Resend has rate limits depending on your plan. For large sequences, add a
+  short delay between batch calls.
+- **No RESEND_API_KEY?** The skill works without it. All email content (subject lines, body copy,
+  preview text, timing) is generated normally. The Resend integration simply adds the ability to
+  send the generated emails directly from the CLI.
 
 ## Output Format
 

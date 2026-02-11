@@ -272,3 +272,135 @@ Full post copy formatted for each requested platform with:
 
 ### 4. Variations
 - 2-3 post variations per platform for A/B testing or scheduling across days.
+
+## API Integrations (Optional Enhancements)
+
+The following integrations enhance the social content workflow but are not required. The skill works fully without them.
+
+### Unsplash Image Sourcing
+
+If `UNSPLASH_CLIENT_ID` is available, source high-quality, royalty-free images for social posts:
+
+```bash
+# Search Unsplash for social media images
+curl -s "https://api.unsplash.com/search/photos?query={topic}&per_page=3" \
+  -H "Authorization: Client-ID ${UNSPLASH_CLIENT_ID}"
+```
+
+**Parsing the response for social media use:**
+
+```bash
+# Extract image URLs and attribution info
+curl -s "https://api.unsplash.com/search/photos?query={topic}&per_page=3" \
+  -H "Authorization: Client-ID ${UNSPLASH_CLIENT_ID}" | \
+  jq -r '.results[] | {
+    image_regular: .urls.regular,
+    image_small: .urls.small,
+    image_thumb: .urls.thumb,
+    photographer: .user.name,
+    photographer_url: .user.links.html,
+    download: .links.download,
+    color: .color,
+    width: .width,
+    height: .height
+  }'
+```
+
+Key fields for social media:
+- **`.urls.regular`** - 1080px wide, good for LinkedIn and Twitter posts
+- **`.urls.small`** - 400px wide, good for thumbnails and previews
+- **`.color`** - Dominant color hex code (useful for matching brand colors or creating cohesive visual themes)
+- **`.width` / `.height`** - Original dimensions (check aspect ratio fits the target platform)
+
+**Platform-specific image tips:**
+- For **Instagram** (1080x1080 or 1080x1350): Search with `orientation=squarish`
+- For **Twitter/LinkedIn** (1200x675): Search with `orientation=landscape`
+- For **TikTok/Reels/Stories** (1080x1920): Search with `orientation=portrait`
+
+**Attribution:** Unsplash requires attribution. Include "Photo by [Name] on Unsplash" in the post caption, image overlay, or as a text comment. Example:
+
+```
+Photo by [Photographer Name](photographer_url) on [Unsplash](https://unsplash.com)
+```
+
+### Reddit Trending Topics & Community Sentiment
+
+If `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET` are available, monitor Reddit for trending topics, popular discussions, and community sentiment to inform social content:
+
+**Step 1: Get an access token**
+
+```bash
+# Get Reddit access token (OAuth2 client credentials flow)
+curl -s -X POST "https://www.reddit.com/api/v1/access_token" \
+  -u "${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}" \
+  -d "grant_type=client_credentials" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}"
+```
+
+The response contains:
+```json
+{
+  "access_token": "your_token_here",
+  "token_type": "bearer",
+  "expires_in": 86400,
+  "scope": "*"
+}
+```
+
+Extract the token:
+```bash
+REDDIT_ACCESS_TOKEN=$(curl -s -X POST "https://www.reddit.com/api/v1/access_token" \
+  -u "${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}" \
+  -d "grant_type=client_credentials" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}" | jq -r '.access_token')
+```
+
+**Step 2: Search for trending topics in a subreddit**
+
+```bash
+# Get hot posts from a relevant subreddit
+curl -s "https://oauth.reddit.com/r/{subreddit}/hot?limit=25" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}"
+```
+
+**Step 3: Parse trending posts for content ideas**
+
+```bash
+# Extract post titles, scores, and comment counts for content inspiration
+curl -s "https://oauth.reddit.com/r/{subreddit}/hot?limit=25" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}" | \
+  jq -r '.data.children[] | .data | {
+    title: .title,
+    score: .score,
+    num_comments: .num_comments,
+    url: .url,
+    created_utc: .created_utc,
+    selftext: (.selftext | if length > 200 then .[:200] + "..." else . end)
+  }'
+```
+
+**Step 4: Search across Reddit for a specific topic**
+
+```bash
+# Search Reddit-wide for discussions about a topic
+curl -s "https://oauth.reddit.com/search?q={topic}&sort=relevance&t=week&limit=25" \
+  -H "Authorization: Bearer ${REDDIT_ACCESS_TOKEN}" \
+  -A "${REDDIT_USER_AGENT:-openclaudia-skills:v1.0}"
+```
+
+**How to use Reddit data for social content:**
+- **Trending topics:** Posts with high scores (500+) and comment counts indicate what the community cares about right now. Use these as content topics.
+- **Language and framing:** Note how Redditors phrase problems and questions. Mirror this language in your social hooks for authenticity.
+- **Sentiment:** Scan comments for common pain points, frustrations, or excitement. Address these directly in your posts.
+- **Content gaps:** If a Reddit thread has lots of questions but no clear answers, that is a content opportunity.
+- **Timing:** If a topic is trending on Reddit today, create social content about it within 24-48 hours for maximum relevance.
+
+**Useful subreddits by niche:**
+- Marketing: r/marketing, r/digital_marketing, r/SEO, r/socialmedia
+- Tech: r/technology, r/programming, r/webdev, r/SaaS
+- Business: r/entrepreneur, r/smallbusiness, r/startups
+- Design: r/design, r/graphic_design, r/UI_Design
+
+**Note:** Reddit API rate limits are 100 requests per minute. The access token expires after 24 hours. Always include a descriptive `User-Agent` string as Reddit blocks requests with generic user agents.

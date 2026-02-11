@@ -87,21 +87,44 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 
 ## API Configuration
 
-Some skills integrate with external APIs. Set these in your `.env` or `~/.claude/.env.global`:
+Some skills integrate with external APIs for live data. Set these in your `.env` or `~/.claude/.env.global`:
 
 ```bash
-# SemRush (keyword research, competitive analysis)
+# Email sending (email-sequence, email-subject-lines)
+RESEND_API_KEY=your_key_here
+
+# SemRush (keyword-research, semrush-research, backlink-audit, competitor-analysis)
 SEMRUSH_API_KEY=your_key_here
 
-# Brand.dev (brand monitoring)
+# Ahrefs (backlink-audit — alternative to SemRush)
+AHREFS_API_KEY=your_key_here
+
+# SerpAPI (serp-analyzer, keyword-research, competitor-analysis)
+SERPAPI_API_KEY=your_key_here
+
+# DataForSEO (serp-analyzer, keyword-research)
+DATAFORSEO_LOGIN=your_login
+DATAFORSEO_PASSWORD=your_password
+
+# Brand.dev (brand-monitor)
 BRANDDEV_API_KEY=your_key_here
 
-# Google (Analytics, Search Console, Ads)
+# Google OAuth (google-analytics, search-console, google-ads-report)
 GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_CLIENT_SECRET=your_client_secret
+
+# Unsplash (write-blog, social-content — featured images)
+UNSPLASH_CLIENT_ID=your_access_key
+
+# Reddit (social-content — trending topics)
+REDDIT_CLIENT_ID=your_client_id
+REDDIT_CLIENT_SECRET=your_client_secret
+
+# ScrapingBee (competitor-analysis — scraping protected pages)
+SCRAPINGBEE_API_KEY=your_key_here
 ```
 
-Skills that require API keys will tell you which key is needed when invoked.
+All API keys are optional. Skills work without them but provide richer data when keys are available. Each skill tells you which key is needed when invoked.
 
 ## Contributing
 

@@ -21,14 +21,35 @@ Ask or infer:
 - **Target audience:** Who is reading this? (Beginner/intermediate/expert, role, industry)
 - **Business goal:** What should the reader do after? (Sign up, buy, share, learn)
 
-**1B. Analyze the SERP (if tools available)**
+**1B. Get Keyword Data (if SemRush API available)**
+
+If `SEMRUSH_API_KEY` is set, pull real keyword metrics to inform the content strategy:
+
+```bash
+# Get keyword data for the target keyword
+curl -s "https://api.semrush.com/?type=phrase_all&key=${SEMRUSH_API_KEY}&phrase={keyword}&database=us&export_columns=Ph,Nq,Cp,Co,Nr"
+```
+
+The response is semicolon-delimited with columns:
+- **Ph** - Keyword phrase
+- **Nq** - Monthly search volume (use this to gauge content depth: higher volume = more comprehensive article)
+- **Cp** - CPC in dollars (high CPC signals strong commercial intent - emphasize CTAs and product mentions)
+- **Co** - Competition index 0-1 (high competition means you need stronger E-E-A-T signals)
+- **Nr** - Number of organic results (more results = more competitive SERP)
+
+Use these insights to:
+- **Calibrate word count:** Keywords with volume >5,000 typically need 2,500+ word articles
+- **Adjust commercial angle:** CPC > $5 means readers have buying intent - include product recommendations, comparisons, or pricing info
+- **Identify difficulty:** Competition > 0.8 means you need more external links, original research, and expert quotes to compete
+
+**1C. Analyze the SERP (if tools available)**
 Use WebSearch to check what currently ranks:
 - What content type dominates? (Listicle, how-to, guide, comparison)
 - What's the average word count of top 5?
 - What topics do all top results cover?
 - What's missing from existing content?
 
-**1C. Build the outline from SERP intelligence**
+**1D. Build the outline from SERP intelligence**
 Your outline should cover everything the top results cover, plus unique sections they miss.
 
 ### Step 2: Create the Outline
@@ -212,6 +233,59 @@ Alt text: "{Descriptive alt text with keyword where natural}"
 - Infographics (for key data points)
 - Process diagrams (for step-by-step content)
 - Charts/graphs (for data-driven claims)
+
+**Sourcing Featured Images from Unsplash (if UNSPLASH_CLIENT_ID available):**
+
+Use the Unsplash API to find high-quality, royalty-free featured images for the blog post:
+
+```bash
+# Search Unsplash for a relevant featured image
+curl -s "https://api.unsplash.com/search/photos?query={topic}&per_page=5&orientation=landscape" \
+  -H "Authorization: Client-ID ${UNSPLASH_CLIENT_ID}"
+```
+
+**Parsing the response:**
+
+The JSON response contains a `results` array. For each photo, extract:
+
+```bash
+# Parse with jq to get image URLs, photographer info, and download links
+curl -s "https://api.unsplash.com/search/photos?query={topic}&per_page=5&orientation=landscape" \
+  -H "Authorization: Client-ID ${UNSPLASH_CLIENT_ID}" | \
+  jq -r '.results[] | {
+    id: .id,
+    description: .description,
+    image_url: .urls.regular,
+    full_url: .urls.full,
+    download_link: .links.download,
+    photographer_name: .user.name,
+    photographer_url: .user.links.html,
+    unsplash_url: .links.html
+  }'
+```
+
+Key fields from the response:
+- **`.urls.regular`** - Optimized image (1080px wide, good for blog featured images)
+- **`.urls.full`** - Full resolution image
+- **`.urls.small`** - Thumbnail (400px wide, good for social sharing previews)
+- **`.links.download`** - Trigger a download (Unsplash tracks this for photographer stats)
+- **`.user.name`** - Photographer's name (required for attribution)
+- **`.user.links.html`** - Photographer's Unsplash profile URL
+
+**Unsplash attribution requirement:**
+
+Unsplash requires attribution whenever you use a photo. Include this in the blog post:
+
+```markdown
+Photo by [Photographer Name](https://unsplash.com/@username?utm_source=your_app&utm_medium=referral) on [Unsplash](https://unsplash.com/?utm_source=your_app&utm_medium=referral)
+```
+
+Place the attribution either:
+- In the image caption directly below the featured image
+- In an image credits section at the bottom of the post
+- In the alt text or title attribute of the image tag
+
+**Tip:** Search with specific, descriptive queries rather than broad terms. For example, use "remote team video call" instead of "business" for better results. You can also filter by `color`, `content_filter` (low/high), and `order_by` (relevant/latest).
 
 **Internal link placement:**
 - Contextual links within body paragraphs (most valuable)

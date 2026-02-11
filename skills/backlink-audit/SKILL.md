@@ -9,12 +9,13 @@ You are an expert link building strategist and backlink auditor. Use the SemRush
 
 ## Prerequisites
 
-This skill requires `SEMRUSH_API_KEY`. Check for it in environment variables or in `~/.claude/.env.global`. If not found, inform the user:
+This skill requires either `SEMRUSH_API_KEY` or `AHREFS_API_KEY` (or both). Check for them in environment variables or in `~/.claude/.env.global`. Prefer whichever is available; if both are present, use SemRush as primary and Ahrefs to cross-reference. If neither is found, inform the user:
 
 ```
-This skill requires a SemRush API key. Set it via:
+This skill requires a SemRush or Ahrefs API key. Set one via:
   export SEMRUSH_API_KEY=your_key_here
-Or add it to ~/.claude/.env.global
+  export AHREFS_API_KEY=your_key_here
+Or add them to ~/.claude/.env.global
 ```
 
 ## SemRush Backlink API Endpoints
@@ -55,6 +56,70 @@ https://api.semrush.com/analytics/v1/?key={KEY}&type=backlinks_pages&target={dom
 
 **7. Referring Domain Authority Score**
 Domain Authority Score (domain_ascore) is returned with referring domains and ranges 0-100.
+
+## Alternative: Ahrefs API
+
+If `AHREFS_API_KEY` is available (and SemRush is not), use the Ahrefs API v3 endpoints below. All endpoints require the Bearer token header.
+
+### Ahrefs Core Endpoints
+
+**1. Backlinks Overview (Stats)**
+```bash
+# Ahrefs backlinks overview
+curl -s "https://api.ahrefs.com/v3/site-explorer/backlinks-stats?target={domain}&output=json" \
+  -H "Authorization: Bearer ${AHREFS_API_KEY}"
+```
+Returns: `live_backlinks`, `all_time_backlinks`, `live_refdomains`, `all_time_refdomains`, `live_refpages`, `dofollow_backlinks`, `nofollow_backlinks`.
+
+**2. Referring Domains**
+```bash
+# Ahrefs referring domains
+curl -s "https://api.ahrefs.com/v3/site-explorer/refdomains?target={domain}&output=json&limit=100" \
+  -H "Authorization: Bearer ${AHREFS_API_KEY}"
+```
+Returns: Array of referring domains with `domain`, `domain_rating`, `backlinks`, `first_seen`, `last_seen`, `dofollow`, `nofollow`. Sort by `domain_rating` to see highest-authority referrers first.
+
+**3. Backlinks List**
+```bash
+curl -s "https://api.ahrefs.com/v3/site-explorer/backlinks?target={domain}&output=json&limit=100&mode=subdomains" \
+  -H "Authorization: Bearer ${AHREFS_API_KEY}"
+```
+Returns: Individual backlinks with `url_from`, `url_to`, `anchor`, `domain_rating`, `first_seen`, `last_seen`, `nofollow`, `redirect`, `edu`, `gov`.
+
+**4. Anchors**
+```bash
+curl -s "https://api.ahrefs.com/v3/site-explorer/anchors?target={domain}&output=json&limit=50&mode=subdomains" \
+  -H "Authorization: Bearer ${AHREFS_API_KEY}"
+```
+Returns: Anchor text distribution with `anchor`, `backlinks`, `refdomains`.
+
+**5. Pages by Backlinks (Best by Links)**
+```bash
+curl -s "https://api.ahrefs.com/v3/site-explorer/best-by-links?target={domain}&output=json&limit=50" \
+  -H "Authorization: Bearer ${AHREFS_API_KEY}"
+```
+Returns: Top linked pages with `url`, `backlinks`, `refdomains`, `dofollow`.
+
+**6. Domain Rating**
+```bash
+curl -s "https://api.ahrefs.com/v3/site-explorer/domain-rating?target={domain}&output=json" \
+  -H "Authorization: Bearer ${AHREFS_API_KEY}"
+```
+Returns: `domain_rating` (0-100) and `ahrefs_rank`.
+
+### Ahrefs vs. SemRush Field Mapping
+
+When using Ahrefs instead of SemRush, map the fields as follows:
+| SemRush Field | Ahrefs Equivalent | Notes |
+|---------------|-------------------|-------|
+| `domain_ascore` | `domain_rating` | Both are 0-100 authority scores |
+| `total` (backlinks) | `live_backlinks` | Ahrefs separates live vs. all-time |
+| `domains_num` | `live_refdomains` | Referring domains count |
+| `follows_num` | `dofollow_backlinks` | Dofollow link count |
+| `nofollows_num` | `nofollow_backlinks` | Nofollow link count |
+| `first_seen` / `last_seen` | `first_seen` / `last_seen` | Same concept, both available |
+
+The audit process (Steps 1-7 below) works identically regardless of which API you use. Simply substitute the corresponding endpoints and field names.
 
 ## Audit Process
 

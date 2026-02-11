@@ -244,6 +244,58 @@ One time, Special promotion, Call now, Apply now, Deal
 - Excessive emojis (more than 1-2)
 - Misleading subject lines that do not match email content
 
+## Sending A/B Tests via Resend API (Optional)
+
+If the `RESEND_API_KEY` environment variable is set, you can send A/B test emails directly from
+the CLI using the [Resend](https://resend.com) API. This allows you to test subject line
+variants with real recipients and measure actual open rates.
+
+**This is entirely optional.** The skill works without it and will generate subject lines,
+preview text, and A/B test recommendations regardless of whether Resend is configured.
+
+### Check for Resend API Key
+
+```bash
+source ~/.claude/.env.global 2>/dev/null
+if [ -z "$RESEND_API_KEY" ]; then
+  echo "RESEND_API_KEY is not set. A/B test emails will not be sent."
+else
+  echo "RESEND_API_KEY is configured. Ready to send A/B test emails."
+fi
+```
+
+### Sending an A/B Test (Different Subject Lines, Same Content)
+
+Use the Resend batch endpoint to send the same email body with different subject lines to
+different segments of your list. Split your recipient list into equal groups:
+
+```bash
+source ~/.claude/.env.global 2>/dev/null
+curl -X POST https://api.resend.com/emails/batch \
+  -H "Authorization: Bearer ${RESEND_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "emails": [
+      {
+        "from": "Your Name <you@yourdomain.com>",
+        "to": ["segment-a-recipient1@example.com", "segment-a-recipient2@example.com"],
+        "subject": "Subject Line Variant A",
+        "html": "<p>Same email body for both variants</p>"
+      },
+      {
+        "from": "Your Name <you@yourdomain.com>",
+        "to": ["segment-b-recipient1@example.com", "segment-b-recipient2@example.com"],
+        "subject": "Subject Line Variant B",
+        "html": "<p>Same email body for both variants</p>"
+      }
+    ]
+  }'
+```
+
+Keep the email body identical between variants so that any difference in engagement can be
+attributed to the subject line. Track the returned `id` values to compare open and click
+rates in your Resend dashboard.
+
 ## Output Format
 
 For every subject line request, deliver:

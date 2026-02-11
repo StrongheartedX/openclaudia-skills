@@ -9,7 +9,10 @@ You are an expert SERP analyst. Given a target keyword, analyze what currently r
 
 ## Prerequisites
 
-Optional: `SEMRUSH_API_KEY` for enriched data. The skill can work without it using web search.
+Optional API keys for enriched data (the skill can work without any of them using web search):
+- `SEMRUSH_API_KEY` - for keyword and organic results data
+- `SERPAPI_API_KEY` - for real-time Google SERP data including SERP features
+- `DATAFORSEO_LOGIN` and `DATAFORSEO_PASSWORD` - for advanced SERP data
 
 ## Analysis Process
 
@@ -29,6 +32,68 @@ Use the WebSearch tool to search for the exact keyword. This gives you real-time
 
 **Method C: Fetch top results**
 Use WebFetch on the top 5-10 ranking URLs to analyze actual content.
+
+**Method D: SerpAPI (if SERPAPI_API_KEY available)**
+
+Real-time Google SERP data with structured SERP features:
+```bash
+# Real-time Google SERP data via SerpAPI
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=20&gl=us&hl=en"
+```
+
+The JSON response includes:
+- `organic_results` - Array of organic listings with `position`, `title`, `link`, `snippet`, `displayed_link`
+- `related_questions` - People Also Ask questions with `question`, `snippet`, `title`, `link`
+- `knowledge_graph` - Knowledge panel data with `title`, `description`, `entity_type`, and attributes
+- `shopping_results` - Product listings (if present) with `title`, `price`, `link`, `source`
+- `local_results` - Local Pack listings (if present) with `title`, `address`, `rating`, `reviews`
+- `inline_images` - Image pack results
+- `answer_box` - Featured snippet content with `type` (paragraph, list, table), `snippet`, `title`
+- `related_searches` - Related search queries
+
+Parse example:
+```bash
+# Extract organic results
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=20&gl=us&hl=en" | \
+  jq '.organic_results[] | {position, title, link, snippet}'
+
+# Extract People Also Ask questions
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=20&gl=us&hl=en" | \
+  jq '.related_questions[] | {question, snippet}'
+
+# Check for knowledge graph
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=20&gl=us&hl=en" | \
+  jq '.knowledge_graph | {title, description, entity_type}'
+```
+
+SerpAPI is especially useful for mapping SERP features in Step 2, as it returns structured data for every feature type.
+
+**Method E: DataForSEO (if DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD available)**
+
+Advanced SERP data with detailed item types and ranking metrics:
+```bash
+# DataForSEO SERP API
+curl -s -X POST "https://api.dataforseo.com/v3/serp/google/organic/live/advanced" \
+  -H "Authorization: Basic $(echo -n '${DATAFORSEO_LOGIN}:${DATAFORSEO_PASSWORD}' | base64)" \
+  -H "Content-Type: application/json" \
+  -d '[{"keyword": "{keyword}", "location_code": 2840, "language_code": "en"}]'
+```
+
+The response provides:
+- `result[0].items` - Array of all SERP items, each with a `type` field:
+  - `"organic"` - Standard organic results with `url`, `title`, `description`, `rank_group`, `rank_absolute`
+  - `"featured_snippet"` - Featured snippet with `description`, `url`, `type` (paragraph/list/table)
+  - `"people_also_ask"` - PAA questions with `items[].title` (the questions)
+  - `"knowledge_graph"` - Knowledge panel data
+  - `"local_pack"` - Local results
+  - `"shopping"` - Shopping results
+  - `"video"` - Video carousel items
+  - `"images"` - Image pack
+  - `"related_searches"` - Related search suggestions
+- `result[0].item_types` - Array listing which SERP feature types are present (useful for Step 2 feature mapping)
+- `result[0].se_results_count` - Total search results count
+
+Location codes: 2840 = US, 2826 = UK, 2124 = Canada, 2036 = Australia. Change `location_code` for geo-targeted analysis.
 
 ### Step 2: Map SERP Features
 

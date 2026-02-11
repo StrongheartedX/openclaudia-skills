@@ -231,3 +231,123 @@ Present results in this structure:
 - **Local vs. national.** For local businesses, append city/state to seed keywords.
 - **Seasonal keywords.** Note if trends show seasonality; plan content 2-3 months before peak.
 - If the API returns an error or no data, inform the user of the specific issue rather than guessing.
+
+## Supplementary API Integrations
+
+These APIs complement SemRush and can be used as alternatives or for additional data points. They are not required if SemRush is available.
+
+### DataForSEO (Alternative/Complement to SemRush)
+
+If `DATAFORSEO_LOGIN` and `DATAFORSEO_PASSWORD` are available, use DataForSEO for keyword search volume and related data. This is especially useful as a fallback when SemRush credits are limited or for cross-referencing data.
+
+**Search Volume Endpoint:**
+
+```bash
+# Get keyword search volume data from DataForSEO
+curl -s -X POST "https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/live" \
+  -H "Authorization: Basic $(echo -n "${DATAFORSEO_LOGIN}:${DATAFORSEO_PASSWORD}" | base64)" \
+  -H "Content-Type: application/json" \
+  -d '[{"keywords": ["keyword1", "keyword2", "keyword3"], "location_code": 2840, "language_code": "en"}]'
+```
+
+**Parsing the response:**
+
+```bash
+# Extract keyword metrics from DataForSEO response
+curl -s -X POST "https://api.dataforseo.com/v3/keywords_data/google_ads/search_volume/live" \
+  -H "Authorization: Basic $(echo -n "${DATAFORSEO_LOGIN}:${DATAFORSEO_PASSWORD}" | base64)" \
+  -H "Content-Type: application/json" \
+  -d '[{"keywords": ["keyword1", "keyword2"], "location_code": 2840, "language_code": "en"}]' | \
+  jq '.tasks[0].result[] | {
+    keyword: .keyword,
+    search_volume: .search_volume,
+    competition: .competition,
+    competition_index: .competition_index,
+    cpc: .cpc,
+    monthly_searches: .monthly_searches
+  }'
+```
+
+Key fields:
+- **`search_volume`** - Average monthly search volume
+- **`competition`** - Competition level: "LOW", "MEDIUM", or "HIGH"
+- **`competition_index`** - Numeric competition score (0-100)
+- **`cpc`** - Cost per click in USD
+- **`monthly_searches`** - Array of 12 monthly volume data points (useful for identifying seasonal trends)
+
+**Common location codes:**
+- `2840` - United States
+- `2826` - United Kingdom
+- `2124` - Canada
+- `2036` - Australia
+- `2250` - France
+- `2158` - Germany
+
+**Keyword Suggestions Endpoint:**
+
+```bash
+# Get keyword suggestions (similar to SemRush phrase_related)
+curl -s -X POST "https://api.dataforseo.com/v3/keywords_data/google_ads/keywords_for_keywords/live" \
+  -H "Authorization: Basic $(echo -n "${DATAFORSEO_LOGIN}:${DATAFORSEO_PASSWORD}" | base64)" \
+  -H "Content-Type: application/json" \
+  -d '[{"keywords": ["seed keyword"], "location_code": 2840, "language_code": "en", "sort_by": "search_volume"}]'
+```
+
+**When to use DataForSEO vs SemRush:**
+- Use **SemRush** as the primary source for keyword difficulty, competitor analysis, and domain organic keywords
+- Use **DataForSEO** for bulk search volume lookups (supports up to 700 keywords per request, more cost-effective for large batches)
+- Use **DataForSEO** when you need Google Ads-aligned data (their data comes directly from Google Keyword Planner)
+- Cross-reference both sources when search volume numbers differ significantly
+
+### SerpAPI (People Also Ask & Related Searches)
+
+If `SERPAPI_API_KEY` is available, use SerpAPI to extract "People Also Ask" questions and related searches directly from Google SERPs. This data is not available from SemRush and is valuable for FAQ sections and content ideation.
+
+**Search Endpoint:**
+
+```bash
+# Get SERP data including People Also Ask and related searches
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=10"
+```
+
+**Parsing People Also Ask:**
+
+```bash
+# Extract People Also Ask questions
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=10" | \
+  jq -r '.related_questions[] | {
+    question: .question,
+    snippet: .snippet,
+    link: .link,
+    title: .title
+  }'
+```
+
+Key response sections:
+- **`related_questions`** - Array of "People Also Ask" questions with snippets and source URLs
+- **`related_searches`** - Array of related search queries that Google suggests
+- **`organic_results`** - Top 10 organic results (useful for SERP analysis)
+
+**Parsing Related Searches:**
+
+```bash
+# Extract related searches for content ideation
+curl -s "https://serpapi.com/search.json?q={keyword}&api_key=${SERPAPI_API_KEY}&num=10" | \
+  jq -r '.related_searches[] | .query'
+```
+
+**How to use SerpAPI data in keyword research:**
+
+1. **FAQ content:** Use "People Also Ask" questions directly as H2/H3 headings in blog posts or as FAQ schema entries. These are questions Google already associates with the keyword.
+2. **Content gap discovery:** If a PAA question has a weak snippet answer (short, vague, or from a low-authority site), that is an opportunity to write a better answer and win the featured snippet.
+3. **Keyword expansion:** Related searches are Google's own suggestions for related topics. Add these to your keyword list and check their volume via SemRush or DataForSEO.
+4. **Search intent validation:** The organic results show what content types Google ranks for this keyword. If all top 10 are blog posts, write a blog post. If they are product pages, a blog post will not rank.
+5. **Cluster building:** Group PAA questions and related searches by subtopic to identify natural content clusters.
+
+**Additional SerpAPI parameters:**
+- `location=United+States` - Geo-target the search
+- `gl=us` - Country code for Google domain
+- `hl=en` - Interface language
+- `device=desktop` or `device=mobile` - Desktop vs mobile SERPs (mobile may show different PAA questions)
+
+**Note:** SerpAPI charges per search. Use it strategically for your highest-priority keywords rather than for bulk research. Pair it with SemRush for volume data and DataForSEO for bulk lookups.
