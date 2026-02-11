@@ -8,10 +8,10 @@ Open-source marketing skills for [Claude Code](https://docs.anthropic.com/en/doc
 
 ```bash
 # Install all skills
-npx skills add Qualia-Li/openclaudia-skills
+npx skills add OpenClaudia/openclaudia-skills
 
 # Install a specific skill
-npx skills add Qualia-Li/openclaudia-skills --skill seo-audit
+npx skills add OpenClaudia/openclaudia-skills --skill seo-audit
 ```
 
 Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.claude/skills/` (project).
