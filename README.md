@@ -36,6 +36,9 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `copywriting` | Marketing copy for any page type |
 | `copy-editing` | Line-by-line copy polish and improvement |
 | `content-strategy` | Build content calendars and topic clusters |
+| `seo-content-brief` | Create structured SEO content briefs for writers |
+| `content-gap-analysis` | Identify content gaps vs. competitors |
+| `content-repurposing` | Atomize content across platforms and formats |
 
 ### Email Marketing
 | Skill | Description |
@@ -49,6 +52,9 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `social-content` | Create and publish posts to Reddit, X, LinkedIn, Instagram, Facebook |
 | `thread-writer` | Write and post viral threads on X and Reddit |
 | `content-calendar` | Plan and schedule social media content |
+| `linkedin-content` | LinkedIn-optimized posts, carousels, and strategy |
+| `bluesky` | Bluesky content creation and AT Protocol integration |
+| `reddit-marketing` | Authentic Reddit marketing and community engagement |
 
 ### Ads & Conversion
 | Skill | Description |
@@ -57,6 +63,7 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `facebook-ads` | Create Facebook/Meta ad campaigns |
 | `page-cro` | Landing page conversion rate optimization |
 | `ab-test-setup` | Design and implement A/B tests |
+| `video-ad-analysis` | Deconstruct and analyze video ad creatives |
 
 ### Analytics & Research (API-Powered)
 | Skill | Description | API Required |
@@ -66,6 +73,7 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `google-analytics` | Pull GA4 reports and insights | Google OAuth |
 | `search-console` | Google Search Console data & analysis | Google OAuth |
 | `google-ads-report` | Google Ads performance reporting | Google OAuth |
+| `youtube-analytics` | YouTube channel and video performance analysis | `YOUTUBE_API_KEY` |
 
 ### Strategy & Planning
 | Skill | Description |
@@ -76,6 +84,9 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `pricing-strategy` | Pricing page and strategy optimization |
 | `launch-strategy` | Product launch planning and execution |
 | `icp-builder` | Define ideal customer profiles |
+| `growth-strategy` | AARRR framework, growth loops, and experimentation |
+| `product-marketing` | Positioning, messaging, battlecards, and GTM |
+| `demand-gen` | Multi-channel demand generation and lead scoring |
 
 ### Messaging & Notifications
 | Skill | Description | API Required |
@@ -92,6 +103,16 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 | `lead-magnet` | Create lead magnets and gated content |
 | `signup-flow-cro` | Optimize signup conversion funnels |
 | `onboarding-cro` | Improve user onboarding flows |
+| `affiliate-marketing` | Build and manage affiliate partner programs |
+| `newsletter` | Newsletter growth, engagement, and monetization |
+| `podcast-marketing` | Podcast production, growth, and promotion |
+
+### CRM & Outreach (API-Powered)
+| Skill | Description | API Required |
+|-------|-------------|--------------|
+| `hubspot` | HubSpot CRM contacts, deals, companies, and CMS | `HUBSPOT_ACCESS_TOKEN` |
+| `apollo-outreach` | B2B lead research and enrichment via Apollo.io | `APOLLO_API_KEY` |
+| `domain-research` | Domain WHOIS lookup and marketplace listings | None (free API) |
 
 ## API Configuration
 
@@ -130,6 +151,19 @@ REDDIT_CLIENT_SECRET=your_client_secret
 
 # ScrapingBee (competitor-analysis — scraping protected pages)
 SCRAPINGBEE_API_KEY=your_key_here
+
+# YouTube Data API (youtube-analytics)
+YOUTUBE_API_KEY=your_key_here
+
+# HubSpot (hubspot)
+HUBSPOT_ACCESS_TOKEN=your_private_app_token
+
+# Apollo.io (apollo-outreach)
+APOLLO_API_KEY=your_key_here
+
+# Bluesky (bluesky)
+BLUESKY_HANDLE=your.handle
+BLUESKY_APP_PASSWORD=your_app_password
 
 # Discord (discord-bot)
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
