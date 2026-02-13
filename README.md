@@ -199,6 +199,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 MIT - see [LICENSE](LICENSE)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=OpenClaudia/openclaudia-skills&type=Date)](https://star-history.com/#OpenClaudia/openclaudia-skills&Date)
+
 ## Created by
 
 [Quanlai Li](https://quanl.ai) and the OpenClaudia community.
