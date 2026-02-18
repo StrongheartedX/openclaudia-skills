@@ -1,20 +1,86 @@
-# OpenClaudia Skills
+<p align="center">
+  <img src="https://openclaudia.com/avatar.png" width="120" alt="OpenClaudia" />
+</p>
 
-Open-source marketing skills for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). The tool for marketers, like Claude Code is for programmers.
+<h1 align="center">OpenClaudia</h1>
 
-**Website:** [openclaudia.com](https://openclaudia.com)
+<p align="center">
+  <strong>The open-source marketing toolkit for AI coding agents.</strong><br/>
+  55+ modular skills that turn Claude Code into a full marketing department.
+</p>
 
-## Quick Install
+<p align="center">
+  <a href="https://www.npmjs.com/package/openclaudia"><img src="https://img.shields.io/npm/v/openclaudia?color=blue&label=npm" alt="npm version" /></a>
+  <a href="https://github.com/OpenClaudia/openclaudia-skills/stargazers"><img src="https://img.shields.io/github/stars/OpenClaudia/openclaudia-skills?style=social" alt="GitHub Stars" /></a>
+  <a href="https://github.com/OpenClaudia/openclaudia-skills/blob/main/LICENSE"><img src="https://img.shields.io/github/license/OpenClaudia/openclaudia-skills" alt="License: MIT" /></a>
+  <a href="https://openclaudia.com"><img src="https://img.shields.io/badge/website-openclaudia.com-purple" alt="Website" /></a>
+</p>
+
+<p align="center">
+  <a href="https://openclaudia.com">Website</a> · <a href="#quick-start">Quick Start</a> · <a href="#skills">Skills</a> · <a href="https://github.com/OpenClaudia/openclaudia-skills/issues">Issues</a> · <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+---
+
+## Why OpenClaudia?
+
+Most AI marketing tools charge **$50–300/month** for a chat box that gives you suggestions. OpenClaudia is different:
+
+| | SaaS Marketing Tools | OpenClaudia |
+|---|---|---|
+| **Price** | $50–300/month | Free & open source |
+| **Execution** | Suggests copy, you do the rest | Actually writes, publishes, sends |
+| **Data privacy** | Your data on their servers | Runs locally on your machine |
+| **Customization** | Limited to their UI | Fork, modify, extend any skill |
+| **Integration** | Walled garden | Works with 20+ APIs you already use |
+| **Setup** | Sign up, onboard, learn their UI | One command: `npx openclaudia install --all` |
+
+## Quick Start
+
+**Prerequisites:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and authenticated.
 
 ```bash
-# Install all skills
-npx skills add OpenClaudia/openclaudia-skills
+# Install all 55+ marketing skills
+npx openclaudia install --all
 
-# Install a specific skill
-npx skills add OpenClaudia/openclaudia-skills --skill seo-audit
+# Or install specific skills
+npx openclaudia install seo-audit write-blog email-sequence
 ```
 
-Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.claude/skills/` (project).
+Then open Claude Code and start marketing:
+
+```
+$ claude
+
+> /audit-seo https://mysite.com
+✓ Analyzing 47 pages... SEO score: 72/100 — 12 issues found
+
+> /write-blog "10 Tips for SaaS Growth"
+✓ 2,400-word article generated with meta tags
+
+> /email-sequence --type product-launch
+✓ 6-email drip sequence created and sent via Resend
+
+> /competitor-analysis competitor.com
+✓ Full SEO, content, and positioning breakdown
+
+> /discord-bot "New feature just dropped!"
+✓ Rich embed posted to #announcements
+```
+
+### Alternative installation
+
+```bash
+# Via the skills CLI
+npx skills add OpenClaudia/openclaudia-skills
+
+# Install a single skill
+npx skills add OpenClaudia/openclaudia-skills --skill seo-audit
+
+# Manual: copy any skill directory into your skills folder
+cp -r skills/seo-audit ~/.claude/skills/      # personal
+cp -r skills/seo-audit .claude/skills/         # project-level
+```
 
 ## Skills
 
@@ -119,7 +185,7 @@ Or manually copy any skill directory into `~/.claude/skills/` (personal) or `.cl
 Some skills integrate with external APIs for live data. Set these in your `.env` or `~/.claude/.env.global`:
 
 ```bash
-# Email sending (email-sequence, email-subject-lines)
+# Email (email-sequence, email-subject-lines)
 RESEND_API_KEY=your_key_here
 
 # SemRush (keyword-research, semrush-research, backlink-audit, competitor-analysis)
@@ -184,25 +250,50 @@ FEISHU_APP_ID=your_app_id
 FEISHU_APP_SECRET=your_app_secret
 ```
 
-All API keys are optional. Skills work without them but provide richer data when keys are available. Each skill tells you which key is needed when invoked.
+All API keys are optional — skills work without them but provide richer data when configured. Each skill tells you which key is needed when invoked.
+
+## Works With Any AI Coding Agent
+
+OpenClaudia skills are designed for **Claude Code** but also work with:
+
+- **OpenAI Codex** — drop skills into your agent's tools directory
+- **Cursor / Windsurf** — use as custom instructions or rules
+- **Any agent** that supports markdown instruction files
 
 ## Contributing
+
+We welcome contributions! Whether it's a new marketing skill, a bug fix, or documentation improvement.
 
 1. Fork this repository
 2. Create a new skill directory under `skills/`
 3. Add a `SKILL.md` with YAML frontmatter and instructions
 4. Submit a pull request
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide, including skill authoring conventions and code review standards.
+
+### Good first issues
+
+Look for issues tagged [`help wanted`](https://github.com/OpenClaudia/openclaudia-skills/labels/help%20wanted) — these are curated for new contributors.
+
+## Ecosystem
+
+OpenClaudia is part of a growing ecosystem of AI agent tools:
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) — the AI coding agent by Anthropic
+- [GEO Guide](https://howtowingeo.com) — how to win at Generative Engine Optimization
+- [PageGun](https://pagegun.com) — AI-powered CMS for content publishing
 
 ## License
 
-MIT - see [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=OpenClaudia/openclaudia-skills&type=Date)](https://star-history.com/#OpenClaudia/openclaudia-skills&Date)
 
-## Created by
+---
 
-[Quanlai Li](https://quanl.ai) and the OpenClaudia community.
+<p align="center">
+  Created by <a href="https://quanl.ai">Quanlai Li</a> and the OpenClaudia community.<br/>
+  <sub>Not affiliated with Anthropic.</sub>
+</p>
