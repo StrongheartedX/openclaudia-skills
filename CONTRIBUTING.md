@@ -34,6 +34,7 @@ Every skill is a single `SKILL.md` file with YAML frontmatter and detailed instr
 ---
 name: your-skill-name
 description: One-line description of what this skill does (shown in skill list)
+allowed-tools: Bash
 ---
 
 # Your Skill Name
@@ -56,6 +57,21 @@ Step-by-step instructions for the agent:
 
 List any API keys needed and how to configure them.
 ```
+
+### Frontmatter fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Skill name (lowercase, hyphenated). Becomes the slash command: `/your-skill-name` |
+| `description` | Yes | One-line description shown in `npx openclaudia list` |
+| `allowed-tools` | No | Comma-separated list of tools the skill needs access to (e.g., `Bash`, `Read`, `Write`). Use this when your skill needs to run shell commands (curl, API calls) or perform file operations. If omitted, the skill can only generate text responses. |
+
+**When to use `allowed-tools`:**
+- `Bash` — skill makes API calls via curl, runs CLI tools, or executes shell commands
+- `Read` — skill needs to read files from the user's project
+- `Write` — skill creates or modifies files
+
+Example: a skill that sends emails via the Resend API needs `allowed-tools: Bash` to execute curl commands.
 
 ### 4. Skill authoring guidelines
 

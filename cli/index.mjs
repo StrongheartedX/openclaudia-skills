@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, cpSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, cpSync, rmSync, readFileSync } from "node:fs";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { homedir, tmpdir } from "node:os";
@@ -48,10 +48,22 @@ function getAvailableSkills(repoDir) {
   });
 }
 
-function installSkills(skillNames) {
-  const tmpDir = cloneRepo();
-  const repoSkillsDir = join(tmpDir, "skills");
-  const available = getAvailableSkills(tmpDir);
+function getSkillDescription(repoDir, skillName) {
+  const skillFile = join(repoDir, "skills", skillName, "SKILL.md");
+  try {
+    const content = readFileSync(skillFile, "utf-8");
+    const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    if (match) {
+      const descMatch = match[1].match(/^description:\s*(.+)$/m);
+      if (descMatch) return descMatch[1].trim().replace(/^["']|["']$/g, "");
+    }
+  } catch {}
+  return "";
+}
+
+function installSkillsFromDir(repoDir, skillNames) {
+  const repoSkillsDir = join(repoDir, "skills");
+  const available = getAvailableSkills(repoDir);
 
   if (!existsSync(SKILLS_DIR)) {
     mkdirSync(SKILLS_DIR, { recursive: true });
@@ -74,7 +86,6 @@ function installSkills(skillNames) {
     installed++;
   }
 
-  rmSync(tmpDir, { recursive: true, force: true });
   return installed;
 }
 
@@ -89,7 +100,10 @@ if (command === "list") {
   console.log(`\n  ${skills.length} available skills:\n`);
   for (const s of skills.sort()) {
     const installed = existsSync(join(SKILLS_DIR, s));
-    console.log(`  ${installed ? "[installed]" : "          "} ${s}`);
+    const desc = getSkillDescription(tmpDir, s);
+    const status = installed ? "[installed]" : "          ";
+    const descStr = desc ? `  ${desc}` : "";
+    console.log(`  ${status} ${s.padEnd(24)}${descStr}`);
   }
   console.log();
   rmSync(tmpDir, { recursive: true, force: true });
@@ -104,20 +118,22 @@ if (command === "install") {
     process.exit(1);
   }
 
+  const tmpDir = cloneRepo();
+
   if (targets.includes("--all")) {
-    const tmpDir = cloneRepo();
     const all = getAvailableSkills(tmpDir);
-    rmSync(tmpDir, { recursive: true, force: true });
     console.log(`\nInstalling all ${all.length} skills to ${SKILLS_DIR}...\n`);
-    const count = installSkills(all);
+    const count = installSkillsFromDir(tmpDir, all);
     console.log(`\nDone! ${count} skills installed.`);
     console.log(`Skills directory: ${SKILLS_DIR}`);
     console.log(`\nRun "claude" and try /write-blog or /seo-audit to get started.\n`);
   } else {
     console.log(`\nInstalling ${targets.length} skill(s) to ${SKILLS_DIR}...\n`);
-    const count = installSkills(targets);
+    const count = installSkillsFromDir(tmpDir, targets);
     console.log(`\nDone! ${count} skill(s) installed.\n`);
   }
+
+  rmSync(tmpDir, { recursive: true, force: true });
   process.exit(0);
 }
 
